@@ -1,0 +1,4 @@
+raw_data/*
+!raw_data/.gitkeep
+mel_data/*
+!mel_data/.gitkeep
