@@ -6,9 +6,10 @@ Created on Wed Jul 28 15:10:09 2021
 """
 
 from .DataGeneratorKeras import DataGeneratorKeras
+from .DatasetGeneratorTF import DatasetGeneratorTF
 
 
 """
 Define what is going to be imported as public with "from ingest import *"
 """
-__all__ = ["DataGeneratorKeras"]
+__all__ = ["DataGeneratorKeras", "DatasetGeneratorTF"]

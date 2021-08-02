@@ -102,6 +102,7 @@ class GeneralUtilities(object):
     @staticmethod
     def scale_linearly(
             magnitude: np.ndarray, 
+            pre_norm: bool = True,
             amin: float = 0., 
             amax: float = 255.
         ) -> np.ndarray:
@@ -112,6 +113,8 @@ class GeneralUtilities(object):
         ----------
         magnitude : np.ndarray, shape = (n_samples, n_detectors)
             Array of data to scale linearly.
+        pre_norm : bool
+            Whether to pre-normalise or not. The default is true
         amin : float, optional
             Minimum value in scaled output array. The default is 0.
         amax : float, optional
@@ -122,9 +125,11 @@ class GeneralUtilities(object):
         np.ndarray
             Scaled output array.
         """
-        max_value = magnitude.max()
-        min_value = magnitude.min()
-        min_max_norm = (magnitude - min_value) / (max_value - min_value)
+        min_max_norm = magnitude
+        if pre_norm:
+            max_value = magnitude.max()
+            min_value = magnitude.min()
+            min_max_norm = (magnitude - min_value) / (max_value - min_value)
         return amin + min_max_norm * (amax - amin) 
     
 

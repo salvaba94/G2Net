@@ -8,7 +8,8 @@ Created on Wed Jul 28 11:03:31 2021
 import librosa
 import numpy as np
 import pandas as pd
-import multiprocess as mp
+import multiprocessing as mp
+from functools import partial
 from pathlib import Path
 from typing import Mapping
 from .GeneralUtilities import GeneralUtilities
@@ -30,6 +31,7 @@ class LogMelSpectrogram(object):
             n_mels: float, 
             n_fft: float, 
             hop_length: float,
+            scale: float = 2e-20,
             f_min: float = 0.,
             f_max: float = None
         ) -> None:
@@ -50,6 +52,8 @@ class LogMelSpectrogram(object):
             Length of the FFT window.
         hop_length : float
             Number of samples between successive frames.
+        scale : float
+            Factor by which strain will be scaled. Default is 2e-20.
         f_min : float
             Minimum frequency in the Mel filter bank [Hz]. Default is 0.
         f_max : float, optional
@@ -59,7 +63,7 @@ class LogMelSpectrogram(object):
         -------
         None
         """
-        self.dataframe = dataframe
+        self.dataframe = dataframe.copy()
         self.datadir = datadir
         self.sample_rate = sample_rate
         self.n_mels = n_mels
@@ -67,6 +71,7 @@ class LogMelSpectrogram(object):
         self.hop_length = hop_length
         self.f_min = f_min
         self.f_max = f_max
+        self.scale = scale
 
 
     def compute_spectrogram(
@@ -83,7 +88,7 @@ class LogMelSpectrogram(object):
 
         Returns
         -------
-        np.ndarray, shape = (n_time, n_freq, n_detectors)
+        np.ndarray, shape = (n_freq, n_time, n_detectors)
             The corresponding batch of log-scaled Mel-spectrograms.
         """
         full_mel_spec = np.array([])
@@ -102,9 +107,10 @@ class LogMelSpectrogram(object):
                                                       fmin = self.f_min,
                                                       fmax = self.f_max)
             mel_spec = librosa.power_to_db(mel_spec)
-            mel_spec = GeneralUtilities.scale_linearly(mel_spec)
             full_mel_spec = np.dstack((full_mel_spec, mel_spec)) \
                 if full_mel_spec.size else mel_spec
+
+        full_mel_spec = GeneralUtilities.scale_linearly(full_mel_spec)
 
         return full_mel_spec
 
@@ -136,15 +142,16 @@ class LogMelSpectrogram(object):
         n_cpus = np.minimum(n_cpus, mp.cpu_count())
 
         with mp.Pool(n_processes) as pool:
-            pool.map(lambda x: self.__generate_spectrogram(self, x, destdir, 
-                     dtype = dtype), self.dataframe.index)
+            gs = partial(self.generate_spectrogram, destdir = destdir, 
+                         dtype = dtype)
+            pool.map(gs, self.dataframe.index)
 
 
-    def __generate_spectrogram(
+    def generate_spectrogram(
             self,
             idx: int,
             destdir: Path,
-            dtype: type = np.float16,
+            dtype: type = np.float32,
             ext: str = ".npy"
         ) -> np.ndarray:
         """
@@ -167,7 +174,7 @@ class LogMelSpectrogram(object):
         """
         spec = self.compute_spectrogram(idx).astype(dtype)
         filename = self.dataframe["id"][idx]
-        full_filename = destdir.joinpath(destdir, filename + ext)
+        full_filename = destdir.joinpath(filename + ext)
         np.save(full_filename, spec)
         
     

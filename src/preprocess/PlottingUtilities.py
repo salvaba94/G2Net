@@ -92,7 +92,7 @@ class PlottingUtilities(object):
             raise ValueError("Function expects exactly data for 3 detectors")
 
         plt.style.use('seaborn')
-        fig, axes = plt.subplots(1, 3, figsize = (15, 5))
+        fig, axes = plt.subplots(1, len(cls.detector), figsize = (15, 5))
         for i in range(len(cls.detector)):
             librosa.display.specshow(data = spectrogram[..., i], 
                                      ax = axes[i], **kwargs)

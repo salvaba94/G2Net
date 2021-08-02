@@ -9,12 +9,13 @@ from .PlottingUtilities import PlottingUtilities
 from .GeneralUtilities import GeneralUtilities
 from .LogMelSpectrogram import LogMelSpectrogram
 from .LogMelSpectrogramLayer import LogMelSpectrogramLayer
+from .CQTransform import CQTransform
 
 """
 Define what is going to be imported as public with "from preprocess import *"
 """
 __all__ = ["PlottingUtilities", "GeneralUtilities", "LogMelSpectrogram", 
-           "LogMelSpectrogramLayer"]
+           "LogMelSpectrogramLayer", "CQTransform"]
 
 
 

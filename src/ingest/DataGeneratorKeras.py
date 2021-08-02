@@ -14,7 +14,7 @@ class DataGeneratorKeras(tf.keras.utils.Sequence):
     
     def __init__(self, dataframe, datadir, batch_size = 32, 
                   shuffle = True, target = True, ext = ".npy"):
-        self.datadir = Path(datadir)
+        self.datadir = datadir
         self.df = dataframe
         self.shuffle = shuffle
         self.target = target
@@ -22,7 +22,6 @@ class DataGeneratorKeras(tf.keras.utils.Sequence):
         self.ext = ext
         self.on_epoch_end()
 
-    
     def __len__(self):
         return np.floor(self.df.shape[0] / self.batch_size).astype("int32")
     
