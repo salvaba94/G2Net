@@ -1,0 +1,65 @@
+dist: xenial
+language: python
+cache: pip
+python:
+  - "3.6"
+env:
+  global:
+    - TF_EAGER="0"
+    - TF_KERAS="0"
+  matrix:
+    - TF_VERSION="1.14.0" KERAS_VERSION="2.2.5"
+    - TF_VERSION="1.14.0" KERAS_VERSION="2.2.5" TF_KERAS="1"
+    - TF_VERSION="2.2.0"  KERAS_VERSION="2.3.0" TF_EAGER="1"
+    - TF_VERSION="2.2.0"  KERAS_VERSION="2.3.0"
+    - TF_VERSION="2.3.1"  KERAS_VERSION="2.3.0" TF_KERAS="1"  TF_EAGER="1"
+    - TF_VERSION="2.3.1"  KERAS_VERSION="2.3.0" TF_KERAS="1"
+
+notifications:
+  email: false
+
+before_install:
+  - chmod +x test.sh
+  - sudo apt-get update
+  - sudo apt-get -y install python-pip
+  - pip install --upgrade pip
+  - pip install pep8
+  - pip install autopep8
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - conda config --set always_yes yes --set changeps1 no
+  - conda install setuptools
+  - conda install conda
+  - conda update --force conda
+  - conda info -a
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION
+  - source activate test-environment
+  - export LD_LIBRARY_PATH=$HOME/miniconda/envs/test-environment/lib/:$LD_LIBRARY_PATH
+  - pip install -r requirements-test.txt
+  - pip install coveralls
+  
+install:
+  - |
+      if [[ -n "$KERAS_VERSION" ]]; then
+          pip install keras=="$KERAS_VERSION";
+      else
+          pip install keras;
+      fi
+      if [[ -n "$TF_VERSION" ]]; then
+          pip install tensorflow=="$TF_VERSION";
+      else
+          pip install tensorflow;
+      fi
+  
+script:
+ - ./test.sh
+
+after_success:
+  # Combine coverage reports from Travis jobs
+  - coverage combine --append
+  - coveralls
+  - codecov
+notifications:
+  webhooks:
+    - https://coveralls.io/webhook

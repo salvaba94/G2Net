@@ -784,6 +784,7 @@ def get_model(model_name,
   else:
     pretrained_ckpt = weights
 
+  print(pretrained_ckpt)
   if tf.io.gfile.isdir(pretrained_ckpt):
     pretrained_ckpt = tf.train.latest_checkpoint(pretrained_ckpt)
   net.load_weights(pretrained_ckpt)

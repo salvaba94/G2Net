@@ -28,7 +28,7 @@ class DatasetGeneratorTF(object):
             shuffle: bool = True,
             shuffle_buffer: int = 1000,
             batch_size: int = 32,
-            dtype: type = np.float32,
+            dtype: type = tf.float16,
             raw_dir: bool = False,
             image_size: List[int] = [128, 128],
             target: bool = True,
@@ -71,12 +71,6 @@ class DatasetGeneratorTF(object):
         self.image_size = image_size
         self.shuffle = shuffle
         self.shuffle_buffer = shuffle_buffer
-        
-        self.dtype_map = {
-            np.float16: tf.float16,
-            np.float32: tf.float32,
-            np.float64: tf.float64
-        }
 
         if raw_dir:
             self.df["paths"] = str(datadir) + os.sep + dataframe["id"].apply(
@@ -91,8 +85,9 @@ class DatasetGeneratorTF(object):
             self, 
             filename
         ) -> np.ndarray:
-        example_data = np.load(filename).astype(self.dtype)
-        example_data = tf.image.resize(example_data, self.image_size)
+        example_data = np.load(filename)
+        example_data = tf.cast(tf.image.resize(example_data, self.image_size), 
+                               dtype = self.dtype)
         return example_data
     
 
@@ -109,7 +104,7 @@ class DatasetGeneratorTF(object):
         """
         feature_ds = tf.data.Dataset.from_tensor_slices(self.df["paths"])
         feature_ds = feature_ds.map(lambda x: tf.numpy_function(
-            self._read_npy, [x], self.dtype_map[self.dtype]), 
+            self._read_npy, [x], self.dtype), 
             num_parallel_calls = AUTOTUNE)
 
         if self.target:

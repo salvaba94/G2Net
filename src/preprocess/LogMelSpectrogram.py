@@ -11,7 +11,7 @@ import pandas as pd
 import multiprocessing as mp
 from functools import partial
 from pathlib import Path
-from typing import Mapping
+from typing import Mapping, Tuple
 from .GeneralUtilities import GeneralUtilities
 
 
@@ -27,13 +27,12 @@ class LogMelSpectrogram(object):
             self,
             dataframe: pd.DataFrame,
             datadir: Path,
+            n_processes: int,
             sample_rate: float, 
             n_mels: float, 
             n_fft: float, 
             hop_length: float,
-            scale: float = 2e-20,
-            f_min: float = 0.,
-            f_max: float = None
+            f_band: Tuple[float, float] = (0., None)
         ) -> None:
         """
         Function to initialise the object.
@@ -52,12 +51,10 @@ class LogMelSpectrogram(object):
             Length of the FFT window.
         hop_length : float
             Number of samples between successive frames.
-        scale : float
-            Factor by which strain will be scaled. Default is 2e-20.
-        f_min : float
-            Minimum frequency in the Mel filter bank [Hz]. Default is 0.
-        f_max : float, optional
-            Maximum frequency in the Mel filter bank [Hz]. Default is None.
+
+        f_band : float
+            Minimum and maximum values to scale the signal before CQT [-]. 
+            Default is None.
 
         Returns
         -------
@@ -69,10 +66,10 @@ class LogMelSpectrogram(object):
         self.n_mels = n_mels
         self.n_fft = n_fft
         self.hop_length = hop_length
-        self.f_min = f_min
-        self.f_max = f_max
-        self.scale = scale
+        self.f_band = f_band
 
+        n_cpus = np.maximum(n_processes, 0)
+        self.n_cpus = np.minimum(n_cpus, mp.cpu_count())
 
     def compute_spectrogram(
             self,
@@ -104,8 +101,8 @@ class LogMelSpectrogram(object):
                                                       n_mels = self.n_mels, 
                                                       n_fft = self.n_fft, 
                                                       hop_length = self.hop_length, 
-                                                      fmin = self.f_min,
-                                                      fmax = self.f_max)
+                                                      fmin = self.f_band[0],
+                                                      fmax = self.f_band[-1])
             mel_spec = librosa.power_to_db(mel_spec)
             full_mel_spec = np.dstack((full_mel_spec, mel_spec)) \
                 if full_mel_spec.size else mel_spec
@@ -117,7 +114,6 @@ class LogMelSpectrogram(object):
 
     def generate_dataset(
             self,
-            n_processes: int,
             destdir: Path,
             dtype: type = np.float16,
         ) -> None:
@@ -126,8 +122,6 @@ class LogMelSpectrogram(object):
 
         Parameters
         ----------
-        n_processes : int
-            Dataframe with the indeces of the samples.
         destdir : Path
             Destination directory.
         dtype : type
@@ -138,10 +132,8 @@ class LogMelSpectrogram(object):
         None
         """
         destdir.mkdir(parents = True, exist_ok = True)
-        n_cpus = np.maximum(n_processes, 0)
-        n_cpus = np.minimum(n_cpus, mp.cpu_count())
 
-        with mp.Pool(n_processes) as pool:
+        with mp.Pool(self.n_cpus) as pool:
             gs = partial(self.generate_spectrogram, destdir = destdir, 
                          dtype = dtype)
             pool.map(gs, self.dataframe.index)
@@ -192,12 +184,12 @@ class LogMelSpectrogram(object):
         config = {
             "datadir": self.datadir,
             "dataframe": self.dataframe,
+            "n_cpus": self.n_cpus,
             "sample_rate": self.sample_rate,
             "n_fft": self.n_fft,
             "hop_length": self.hop_length,
             "n_mels": self.n_mels,
-            "f_min": self.f_min,
-            "f_max": self.f_max,
+            "f_band": self.f_band
         }
         return config
 

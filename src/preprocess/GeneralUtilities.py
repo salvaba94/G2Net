@@ -103,8 +103,8 @@ class GeneralUtilities(object):
     def scale_linearly(
             magnitude: np.ndarray, 
             pre_norm: bool = True,
-            amin: float = 0., 
-            amax: float = 255.
+            band_in: Tuple[float, float] = None,
+            band_out: Tuple[float, float] = (0., 255.), 
         ) -> np.ndarray:
         """
         Function to scale linearly an array of data.
@@ -115,10 +115,12 @@ class GeneralUtilities(object):
             Array of data to scale linearly.
         pre_norm : bool
             Whether to pre-normalise or not. The default is true
-        amin : float, optional
-            Minimum value in scaled output array. The default is 0.
-        amax : float, optional
-            Maximum value in scaled output array. The default is 255.
+        band_in : Tuple[float, float], optional
+            Minimum and maximum values for input array. The default is None,
+            which means that the minimum and maximum from magnitude array will
+            be used 
+        band_out : Tuple[float, float] optional
+             Minimum and maximum values for output array. The default is (0, 255).
 
         Returns
         -------
@@ -127,10 +129,13 @@ class GeneralUtilities(object):
         """
         min_max_norm = magnitude
         if pre_norm:
-            max_value = magnitude.max()
-            min_value = magnitude.min()
-            min_max_norm = (magnitude - min_value) / (max_value - min_value)
-        return amin + min_max_norm * (amax - amin) 
+            if band_in is None:
+                min_val, max_val = magnitude.min(), magnitude.max()
+            else:
+                min_val, max_val = band_in
+
+            min_max_norm = (magnitude - min_val) / (max_val - min_val)
+        return band_out[0] + min_max_norm * (band_out[-1] - band_out[0]) 
     
 
 ##############################################################################

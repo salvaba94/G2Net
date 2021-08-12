@@ -30,7 +30,7 @@ class G2NetEfficientNet(object):
             self, 
             input_shape: Tuple[int, int, int],
             weights: str = "imagenet",
-            dtype: type = tf.float32
+            dtype: type = tf.float16
         ) -> None:
 
 
