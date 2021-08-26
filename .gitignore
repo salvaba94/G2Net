@@ -1,7 +1,9 @@
 raw_data/*
 !raw_data/.gitkeep
-mel_data/*
-!mel_data/.gitkeep
+data/*
+!data/.gitkeep
+tfr_data/*
+!tfr_data/.gitkeep
 cqt_data/*
 !cqt_data/.gitkeep
 saved_models/*
@@ -12,6 +14,7 @@ src/preprocess/__pycache__
 src/ingest/__pycache__
 src/models/__pycache__
 src/train/__pycache__
+src/utilities/__pycache__
 
 src/automl/__pycache__
 src/automl/efficientnetv2/__pycache__
