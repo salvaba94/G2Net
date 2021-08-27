@@ -18,7 +18,7 @@ N_SAMPLES, N_DETECT = GeneralUtilities.get_dims(RAW_TRAIN_PATH, trans = True)
 
 
 ### Plotting #################################################################
-PLOT_EXAMPLE = False
+PLOT_EXAMPLE = True
 PLOT_EXAMPLE_IDX = 98 #98
 
 

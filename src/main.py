@@ -84,6 +84,8 @@ if __name__ == "__main__":
         PlottingUtilities.plot_count(train_df_ori)
 
 
+##############################################################################
+
     # Create strategy and define data types for data and tensorflow models
     strategy, device = Acceleration.get_acceleration()
     policy = tf.keras.mixed_precision.experimental.Policy("mixed_bfloat16") if \

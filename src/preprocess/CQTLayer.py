@@ -18,7 +18,16 @@ from utilities import GeneralUtilities
 
 class CQTLayer(tf.keras.layers.Layer):
     """
-    Constant Q Transform keras layer.
+    Constant Q Transform keras layer. Based on the nnaudio implementation 
+    and extended to bound the output spectrogram to the input of an image-based
+    model.
+    
+    See "K. W. Cheuk, H. Anderson, K. Agres and D. Herremans, nnAudio: An 
+    on-the-Fly GPU Audio to Spectrogram Conversion Toolbox Using 1D 
+    Convolutional Neural Networks, in IEEE Access, vol. 8, pp. 161981-162003, 
+    2020, doi: 10.1109/ACCESS.2020.3019084. 
+    
+    https://github.com/KinWaiCheuk/nnAudio
     """
 
     def __init__(
@@ -44,25 +53,53 @@ class CQTLayer(tf.keras.layers.Layer):
         Parameters
         ----------
         sample_rate : int, optional
-            DESCRIPTION. The default is 22050.
+            The sampling rate for the input time series. It is used to 
+            calculate the correct "f_min" and "f_max". The default is 22050.
         hop_length : int, optional
-            DESCRIPTION. The default is 512.
+            The hop (or stride) size. The default is 512.
         n_bins : TYPE, optional
-            DESCRIPTION. The default is 84.
+            The total numbers of CQT bins. Will be ignored if "f_max" is not None. 
+            The default is 84. 
         bins_per_octave : int, optional
             DESCRIPTION. The default is 12.
         f_band : Tuple[float, float], optional
-            DESCRIPTION. The default is (0.0, None).
+            The frequency for the lowest (f_min) and highest (f_max) CQT bin. 
+            The default is (0., None). Since the default highest CQT bin frequency 
+            is None, it will be inferred from n_bins and bins_per_octave. 
+            If provided, n_bins will be ignored. 
         norm : int, optional
-            DESCRIPTION. The default is 1.
+            Normalization for the CQT kernels. 1 means L1 normalization and 2 
+            means L2 normalization. The default is 1, which is same as the 
+            normalization used in librosa.
         filter_scale : int, optional
             DESCRIPTION. The default is 1.
         window : str, optional
             DESCRIPTION. The default is "hann".
-
-        Returns
-        -------
-        None
+        center : bool
+            Putting the CQT keneral at the center of the time-step or not.
+            The default is True.
+        pad_mode : str, optional
+            The padding method. The default is "reflect".
+            The possible options are:
+                - "constant"
+                - "reflect"
+        norm_type : str, optional
+            Type of the normalization. The default is "librosa". 
+            The possible options are: 
+                - "librosa" : the output fits the librosa one.
+                - "convolutional" : the output conserves the convolutional 
+                  inequalities of the wavelet transform.
+                - "wrap" : wraps positive and negative frequencies into 
+                  positive frequencies. 
+        image_out : bool, optional
+            Whether to return a spectrogram scaled to the 0-255 range with 
+            current minimum and maximum. Default is True.
+        perc_range : float, optional
+            Extra range to apply to tracked spectrogram output maximum to 
+            leave a safe margin for non-seen examples. The default is 0.05.
+        minmax_init : Tuple[float, float], optional
+            Initial values for tracking minimum and maximum spectrogram outputs.
+            The default is (0., -1e7)
         """
     
         super(CQTLayer, self).__init__(**kwargs)

@@ -9,8 +9,7 @@ import tensorflow as tf
 import numpy as np
 from scipy import signal
 from scipy import interpolate
-from functools import partial
-from typing import Tuple, Mapping
+from typing import Tuple
 
 from utilities import GeneralUtilities
 

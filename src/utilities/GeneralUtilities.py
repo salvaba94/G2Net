@@ -156,7 +156,7 @@ class GeneralUtilities(object):
         Parameters
         ----------
         idx : int
-            Index in of the sample used to compute the mean.
+            Index in of the example used to compute the mean.
         sample_df : pd.DataFrame
             Sample dataset with the example IDs from which to extract the 
             statistics. Could contain the full dataset or a reduced version.
@@ -233,11 +233,11 @@ class GeneralUtilities(object):
             Directory where the data is stored.
         n_processes : int, optional
             Number of processes to compute the statistics. A map reduce will 
-            be performed. The default is None.
+            be performed. The default is 1.
 
         Returns
         -------
-        nd.array, shape = (2,)
+        np.ndarray, shape = (2,)
             Numpy array containing the overall stats of the full dataset in this 
             order: mean and standard deviation.
         """
@@ -245,10 +245,13 @@ class GeneralUtilities(object):
         n_cpus = np.minimum(n_cpus, mp.cpu_count())
 
         with mp.Pool(n_cpus) as pool:
-            means = np.array(pool.map(cls._get_wave_mean, sample_df.index))
+            get_means = partial(cls._get_wave_mean, sample_df = sample_df, 
+                                datadir = datadir)
+            means = np.array(pool.map(get_means, sample_df.index))
 
         with mp.Pool(n_cpus) as pool:
-            get_sqdiffs = partial(cls._get_wave_sqdiff, means = means)
+            get_sqdiffs = partial(cls._get_wave_sqdiff, means = means, 
+                                  sample_df = sample_df, datadir = datadir)
             sqdiffs = np.array(pool.map(get_sqdiffs, sample_df.index))
 
         n_points = np.prod(GeneralUtilities.get_dims(datadir))
