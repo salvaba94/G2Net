@@ -33,7 +33,6 @@ class PermuteChannel(tf.keras.layers.Layer):
         ----------
         rate : float, optional
             Probability of performing a permutation. The default 0.5.
-
         """
     
         super(PermuteChannel, self).__init__(**kwargs)
@@ -53,6 +52,7 @@ class PermuteChannel(tf.keras.layers.Layer):
         input_shape : Tuple[int, int]
             Shape of the input to the layer.
         """
+
         super(PermuteChannel, self).build(input_shape)
 
 
@@ -67,12 +67,12 @@ class PermuteChannel(tf.keras.layers.Layer):
         Parameters
         ----------
         data : tf.Tensor, shape = (None, n_time, n_freq, n_detectors)
-            A batch of input images, n_detectors (n_channels) should be last.
+            A batch of channeled inputs, n_detectors (n_channels) should be last.
 
         Returns
         -------
         tf.Tensor, shape = (None, n_time, n_freq, n_detectors)
-            The corresponding batch of.
+            The corresponding batch of channeled inputs.
         """
 
         x = GeneralUtilities.broadcast_dim(data)

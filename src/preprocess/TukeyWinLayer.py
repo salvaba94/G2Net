@@ -31,12 +31,7 @@ class TukeyWinLayer(tf.keras.layers.Layer):
         Parameters
         ----------
         initial_alpha : float, optional
-            Shape parameter of the tukey window. 
-            The default is  0.25.
-
-        Returns
-        -------
-        None
+            Shape parameter of the tukey window. The default is 0.25.
         """
     
         super(TukeyWinLayer, self).__init__(**kwargs)
@@ -102,6 +97,11 @@ class TukeyWinLayer(tf.keras.layers.Layer):
         """
         Case for a null shape parameter.
 
+        Parameters
+        ----------
+        w_len : int
+            Length of the window.
+
         Returns
         -------
         tf.Tensor : shape = (window_len,)
@@ -118,6 +118,11 @@ class TukeyWinLayer(tf.keras.layers.Layer):
         ) -> tf.Tensor:
         """
         Case for a unity shape parameter.
+
+        Parameters
+        ----------
+        w_len : int
+            Length of the window.
 
         Returns
         -------
@@ -136,6 +141,11 @@ class TukeyWinLayer(tf.keras.layers.Layer):
         ) -> tf.Tensor:
         """
         Case for a non-null and non-unity shape parameter.
+
+        Parameters
+        ----------
+        w_len : int
+            Length of the window.
 
         Returns
         -------
@@ -171,6 +181,11 @@ class TukeyWinLayer(tf.keras.layers.Layer):
         ) -> tf.Tensor:
         """
         Tukey window getter.
+
+        Parameters
+        ----------
+        w_len : int
+            Length of the window.
 
         Returns
         -------

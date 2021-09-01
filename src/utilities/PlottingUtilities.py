@@ -41,10 +41,6 @@ class PlottingUtilities(object):
             Waveform data to plot.
         timespan : float, optional
             Time span of the waveforms [s]. The default is 2.
-
-        Returns
-        -------
-        None
         """
         if waveforms.shape[-1] != 3:
             raise ValueError("Function expects exactly data for 3 detectors")
@@ -71,22 +67,18 @@ class PlottingUtilities(object):
     def plot_spectrogram(
             cls,
             spectrogram: np.ndarray,
-            sr: float,
+            sample_rate: float,
             **kwargs
         ) -> None:
         """
-        Function to plot a spectrogram
+        Function to plot a spectrogram.
 
         Parameters
         ----------
         spectrogram : np.ndarray, shape (n_width, n_height, n_detectors)
             Spectrogram data.
-        sr : float
+        sample_rate : float
             Sampling rate [Hz].
-
-        Returns
-        -------
-        None
         """
         if spectrogram.shape[-1] != 3:
             raise ValueError("Function expects exactly data for 3 detectors")

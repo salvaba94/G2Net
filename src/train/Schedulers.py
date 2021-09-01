@@ -11,17 +11,23 @@ import tensorflow as tf
 
 class CosineAnnealingRestarts(tf.keras.experimental.CosineDecayRestarts):
     """
-    This class inherits from CosineDecayRestarts and adds the functionality 
-    of returning the initial learning rate when a float conversion is called.
+    This class inherits from CosineDecayRestarts. It adds the functionality 
+    of returning the initial learning rate when a float conversion is called 
+    and the assignment functionality.
     """
 
     def __init__(
             self,
-            dtype = tf.float32,
+            dtype: type = tf.float32,
             **kwargs
         ) -> None:
         """
         Object initialization function.
+
+        Parameters
+        ----------
+        dtype : type
+            Data type of the learning rate.
         """
 
         super(CosineAnnealingRestarts, self).__init__(**kwargs)

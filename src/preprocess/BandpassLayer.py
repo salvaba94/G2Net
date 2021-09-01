@@ -9,7 +9,7 @@ import tensorflow as tf
 import numpy as np
 from scipy import signal
 from scipy import interpolate
-from typing import Tuple
+from typing import Tuple, Mapping
 
 from utilities import GeneralUtilities
 
@@ -20,28 +20,43 @@ from utilities import GeneralUtilities
 
 class BandpassLayer(tf.keras.layers.Layer):
     """
-    Layer that applies a bandpass filter in the frequency domain, where the 
-    possibility of training frequency response from the filter is given.
+    Layer that applies a bandpass Butterworth filter in the frequency domain, 
+    where the possibility of training frequency response from the filter is 
+    given.
     """
 
     def __init__(
             self, 
             sample_rate: float = 2048.,
             degree: int = 8,
-            f_band: Tuple[float, float] = (20, 500),
+            f_band: Tuple[float, float] = (20., 500.),
             n_samples: int = 4096,
             **kwargs
         ) -> None:
         """
-        Funtion to initialize the lo
+        Funtion to initialize the object.
 
         Parameters
         ----------
-        
+        sample_rate : float, optional
+            The sampling rate for the input time series [Hz]. It is used to 
+            calculate the correct "f_min" and "f_max". The default is 2048.
+        degree : int, optional
+            Degree of the Butterworth filter. The default is 8.
+        f_band : Tuple[float, float], optional
+            The frequency band for the bandpass filter [Hz]. 
+            The default is (20., 500). 
+        n_samples : int, optional
+            Number of samples of the signal to filter. The default is 4096.
 
         """
     
         super(BandpassLayer, self).__init__(**kwargs)
+        
+        self.sample_rate = sample_rate
+        self.degree = degree
+        self.f_band = f_band
+        self.n_samples = n_samples
 
         if f_band[-1] <= f_band[0]:
             raise ValueError("Maximum frequency in spectral band should be \
@@ -68,8 +83,6 @@ class BandpassLayer(tf.keras.layers.Layer):
                                  trainable = self.trainable,
                                  name = self.name + "/f_response", 
                                  dtype = self.dtype)
-
-
 
 
     def build(
@@ -127,6 +140,27 @@ class BandpassLayer(tf.keras.layers.Layer):
         bandpass /= self.norm
         return bandpass
 
+
+    def get_config(
+            self
+        ) -> Mapping[str, float]:
+        """
+        Function to get the configuration parameters of the object.
+        
+        Returns
+        -------
+        Mapping[str, float]
+            Dictionary containing the configuration parameters of the object.
+        """
+        config = {
+            "sample_rate": self.sample_rate,
+            "degree": self.degree,
+            "f_band": self.f_band,
+            "n_samples": self.n_samples
+        }
+
+        config.update(super(BandpassLayer, self).get_config())
+        return config
 
     
 ##############################################################################

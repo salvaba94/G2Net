@@ -80,7 +80,7 @@ if __name__ == "__main__":
         PlottingUtilities.plot_wave(y_win)
         # PlottingUtilities.plot_wave(y_whi)
         PlottingUtilities.plot_wave(y_band)
-        PlottingUtilities.plot_spectrogram(y_spec, config.SAMPLE_RATE)
+        PlottingUtilities.plot_spectrogram(y_spec)
         PlottingUtilities.plot_count(train_df_ori)
 
 

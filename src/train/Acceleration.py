@@ -19,10 +19,6 @@ class Acceleration(object):
         """
         Function to get and configure the hardware acceleration. It will 
         sequentially try to configure TPU, GPU and CPU.
-
-        Returns
-        -------
-        None
         """
         try:
             tpu = tf.distribute.cluster_resolver.TPUClusterResolver()

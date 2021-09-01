@@ -16,7 +16,7 @@ from utilities import GeneralUtilities
 
 class WhitenLayer(tf.keras.layers.Layer):
     """
-    Layer that applies a spectral whitening to an input time series.
+    Layer that applies spectral whitening to an input time series.
     """
 
     def __init__(
@@ -41,7 +41,8 @@ class WhitenLayer(tf.keras.layers.Layer):
             input_shape: Tuple[int, int]
         ) -> None:
         """
-        Function to build the graph of the layer.
+        Function to build the graph of the layer. Adds trainable and non-
+        trainable parameters.
 
         Parameters
         ----------
