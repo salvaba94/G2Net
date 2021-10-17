@@ -299,6 +299,7 @@ class GeneralUtilities(object):
             Tuple containing the mean and the standard deviation of the dataset.
         """
 
+        print("Getting data statistics...")
         data_file = datadir.joinpath("..","wave_stats.npy")
         if not data_file.exists() and n_processes is None:
             raise ValueError("Stats file does not exist and needs to be \
@@ -306,6 +307,7 @@ class GeneralUtilities(object):
         data_stats = np.load(data_file) if data_file.exists() else \
             cls._generate_statistics(data_file, sample_df, datadir, 
                                      n_processes = n_processes)
+        print("Done!")
         return data_stats
 
 

@@ -9,7 +9,6 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 import os
-import multiprocessing as mp
 from pathlib import Path
 from typing import Union, Tuple
 from functools import partial
@@ -27,7 +26,6 @@ class TFRDatasetCreator(object):
             dataframe: pd.DataFrame,
             datadir: Path,
             trans: bool = False,
-            target: bool = False,
             data_stats: Tuple[float, float] = None,
             raw_dir: bool = False,
             ext_in: str = ".npy",
@@ -62,7 +60,6 @@ class TFRDatasetCreator(object):
 
         self.df = dataframe.copy()
         self.datadir = datadir
-        self.target = target
         self.data_stats = data_stats
         self.trans = trans
 
@@ -93,21 +90,9 @@ class TFRDatasetCreator(object):
             The converted feature.
         """
 
-        value = value.numpy() if isinstance(value, type(tf.constant(0))) else value
-        value = value.encode() if isinstance(value, str) else value
-
+        if isinstance(value, type(tf.constant(0))):
+            value = value.numpy()
         return tf.train.Feature(bytes_list = tf.train.BytesList(value = [value]))
-
-
-    @classmethod
-    def _array_feature(
-            cls,
-            value: np.ndarray,
-            dtype: type = tf.float32
-        ) -> tf.train.Feature:
-        
-        tensor = tf.convert_to_tensor(value, dtype = dtype)
-        return cls._bytes_feature(tf.io.serialize_tensor(tensor))
 
 
     @staticmethod
@@ -121,24 +106,25 @@ class TFRDatasetCreator(object):
     def _serialize_example(
             self, 
             idx,
-            dtype: type = tf.float16
+            dtype: type = tf.float32
         ) -> str:
 
         data = np.load(self.df["path"][idx])
         identity = self.df["id"][idx]
+        target = self.df["target"][idx]
+
         data = data.T if self.trans else data
+        
         if self.data_stats is not None:
             data = (data - self.data_stats[0]) / self.data_stats[-1] 
 
-        feature = {
-            "data": self._array_feature(data, dtype = dtype),
-            "shape": self._array_feature(data.shape, dtype = tf.int64),
-            "id": self._bytes_feature(identity)
-        }
+        data = tf.convert_to_tensor(data, dtype = dtype)
 
-        if self.target:
-            target = self.df["target"][idx]
-            feature["target"] = self._int_feature(target)
+        feature = {
+            "data": self._bytes_feature(tf.io.serialize_tensor(data)),
+            "id": self._bytes_feature(identity.encode()),
+            "target": self._int_feature(np.int(target))
+        }
         
         example = tf.train.Example(features = tf.train.Features(feature = feature))
         return example.SerializeToString()
@@ -148,7 +134,7 @@ class TFRDatasetCreator(object):
             self,
             data: Tuple[int, np.ndarray],
             destdir: Path,
-            dtype: type = tf.float16,
+            dtype: type = tf.float32,
             filename: str = "train",
             ext_out: str = ".tfrec"
         ) -> None:
@@ -165,53 +151,51 @@ class TFRDatasetCreator(object):
             self,
             n_samples,
             destdir: Path,
-            dtype: type = tf.float16,
+            dtype: type = tf.float32,
             filename: str = "train",
-            ext_out: str = ".tfrec",
-            n_processes: int = 1
+            ext_out: str = ".tfrec"
         ) -> None:
-
-        n_cpus = np.maximum(n_processes, 0)
-        n_cpus = np.minimum(n_cpus, mp.cpu_count())
 
         destdir.mkdir(parents = True, exist_ok = True)
 
         n_files = np.int32(np.ceil(self.df.shape[0] / n_samples))
 
-        with mp.Pool(n_cpus) as pool:
+        for n_batch, batch in enumerate(np.array_split(self.df.index, n_files)): 
+            print("Writing TFRecord " + str(n_batch) + " with files from " + 
+                  str(batch[0]) + " to " + str(batch[-1]))
             writer = partial(self._serialize_batch, destdir = destdir, 
                          dtype = dtype, filename = filename, ext_out = ext_out)
-            pool.map(writer, enumerate(np.array_split(self.df.index, n_files)))
+            writer((n_batch, batch))
 
 
     @staticmethod
     def deserialize_example(
             element,
-            dtype: type = tf.float16,
+            dtype: type = tf.float32,
             target: bool = False,
-            identify: bool = False
+            shape: Tuple[int, int] = (4096, 3)
         ) -> Tuple[tf.Tensor, int, int]:
 
         feature = {
             "data"  : tf.io.FixedLenFeature([], tf.string),
-            "shape" : tf.io.FixedLenFeature([], tf.string),
-            "id" : tf.io.FixedLenFeature([], tf.string)
+            "id" : tf.io.FixedLenFeature([], tf.string),
+            "target" : tf.io.FixedLenFeature([], tf.int64)
         }
-        if target:
-            feature["target"] = tf.io.FixedLenFeature([], tf.int64)
 
-        content  = tf.io.parse_single_example(element, feature)
-
-        shape = tf.io.parse_tensor(content["shape"], out_type = tf.int64)    
-        data = tf.io.parse_tensor(content["data"], out_type = dtype)
+        content = tf.io.parse_single_example(element, feature)
+ 
+        data = content["data"]
+        data = tf.io.parse_tensor(data, out_type = dtype)
         data = tf.reshape(data, shape = shape)
+
+        idx = tf.cast(tf.strings.unicode_decode(content["id"], "UTF-8"), 
+                      dtype = tf.int32)
+        label = tf.cast(content["target"] , dtype)
         
-        label = content["target"] if target else None
-        identity = content["id"] if identify else None
-        ret_val = (data,)
-        ret_val = ret_val + (label,) if target else ret_val
-        ret_val = ret_val + (identity,) if identify else ret_val
-        return ret_val
+        if target:
+            return data, label
+        else:
+            return data, idx
 
 
 ##############################################################################

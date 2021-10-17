@@ -67,7 +67,6 @@ class PlottingUtilities(object):
     def plot_spectrogram(
             cls,
             spectrogram: np.ndarray,
-            sample_rate: float,
             **kwargs
         ) -> None:
         """
@@ -77,8 +76,6 @@ class PlottingUtilities(object):
         ----------
         spectrogram : np.ndarray, shape (n_width, n_height, n_detectors)
             Spectrogram data.
-        sample_rate : float
-            Sampling rate [Hz].
         """
         if spectrogram.shape[-1] != 3:
             raise ValueError("Function expects exactly data for 3 detectors")

@@ -13,6 +13,7 @@ from typing import Tuple
 from tensorflow.data.experimental import AUTOTUNE
 
 from .TFRDatasetCreator import TFRDatasetCreator
+from config import Config
 
 
 
@@ -118,8 +119,11 @@ class DatasetGeneratorTF(object):
         else:
             ds = feature_ds
 
-        ds = ds.shuffle(buffer_size) if shuffle else ds
-        ds = ds.repeat() if repeat else ds
+        if shuffle:
+            ds = ds.shuffle(buffer_size)
+        
+        if repeat:
+            ds = ds.repeat()
 
         ds = ds.batch(self.batch_size)
         return ds.prefetch(AUTOTUNE)
@@ -127,12 +131,11 @@ class DatasetGeneratorTF(object):
 
     def _get_dataset_from_tfrec(
             self,
-            ignore_order: bool = True,
             shuffle: bool = True,
-            buffer_size: int = 1000,
+            buffer_size: int = 1024,
+            ordered: bool = False,
             repeat: bool = True,
-            target: bool = True,
-            identify: bool = False
+            target: bool = True
         ) -> tf.data.Dataset:
         """
         Function to get the dataset pipeline from TFRecords.
@@ -142,8 +145,7 @@ class DatasetGeneratorTF(object):
         shuffle_buffer : int, optional
             Shuffle buffer size. If None, no shuffle will be applied. The default 
             is 3200.
-        ignore_order : bool, optional
-            Dataframe with the indeces of the samples. The default is True.
+
 
         Returns
         -------
@@ -152,31 +154,34 @@ class DatasetGeneratorTF(object):
         """
 
         ds = tf.data.TFRecordDataset(self.df["path"], num_parallel_reads = AUTOTUNE)
-        if ignore_order:
+
+        if not ordered:
             ignore_order = tf.data.Options()
             ignore_order.experimental_deterministic = False
             ds = ds.with_options(ignore_order)
 
         ds = ds.map(lambda x: TFRDatasetCreator.deserialize_example(
-            x, dtype = self.dtype, target = target, identify = identify), 
-            num_parallel_calls = AUTOTUNE)
+            x, dtype = self.dtype, target = target, shape = (Config.N_SAMPLES, 
+            Config.N_DETECT)), num_parallel_calls = AUTOTUNE)
 
-        ds = ds.shuffle(buffer_size) if shuffle else ds
-        ds = ds.repeat() if repeat else ds
+        if shuffle:
+            ds = ds.shuffle(buffer_size)
+
+        if repeat:
+            ds = ds.repeat()
         
-        ds = ds.batch(self.batch_size)
+        ds = ds.batch(self.batch_size, drop_remainder = target)
         return ds.prefetch(AUTOTUNE)
 
 
     def get_dataset(
             self,
-            tfrec: bool = True,
-            ignore_order: bool = True,
+            tfrec: bool = True, 
             shuffle: bool = True,
-            buffer_size: int = 3200,
+            buffer_size: int = 1024,
+            ordered: bool = False,
             repeat: bool = True,
-            target: bool = True,
-            identify: bool = False
+            target: bool = True
         ) -> tf.data.Dataset:
         """
         Function to get the dataset pipeline.
@@ -190,9 +195,6 @@ class DatasetGeneratorTF(object):
             is 3200.
         ignore_order : bool, optional
             Dataframe with the indeces of the samples. The default is True.
-        identify : bool, optional
-            Whether to append the identity to the predictions. Only for TFRecords mode.
-            Default is false.
 
         Returns
         -------
@@ -200,8 +202,8 @@ class DatasetGeneratorTF(object):
             Dataset pipeline.
         """
         
-        ret_val = self._get_dataset_from_tfrec(ignore_order, shuffle, buffer_size,
-            repeat, target, identify) if tfrec else self._get_dataset_from_npy(
+        ret_val = self._get_dataset_from_tfrec(shuffle, buffer_size, ordered,
+            repeat, target) if tfrec else self._get_dataset_from_npy(
             shuffle, buffer_size, repeat, target)
         return ret_val
             
