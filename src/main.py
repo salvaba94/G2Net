@@ -30,8 +30,6 @@ import tensorflow as tf
 
 # Import project modules
 from utilities import PlottingUtilities, GeneralUtilities
-from preprocess import CQTLayer, TukeyWinLayer, BandpassLayer
-from preprocess import PermuteChannel, GaussianNoise, SpectralMask
 from ingest import TFRDatasetCreator, NPYDatasetCreator, DatasetGeneratorTF
 from models import G2NetEfficientNet
 from train import RocLoss, Acceleration, CosineAnnealingRestarts
@@ -253,6 +251,9 @@ if __name__ == "__main__":
                                   callbacks = [lr_callback, check_callback])
         
         model.save_weights(Config.MODEL_PATH.joinpath(Config.MODEL_SAVE_NAME))
+        
+        train_hist_df = pd.DataFrame(train_history.history)
+        train_hist_df.to_csv(data_path.Config.HISTORY_NAME, index = False)
 
 
 ##############################################################################

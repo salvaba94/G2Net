@@ -17,7 +17,7 @@ import librosa.display
 
 class PlottingUtilities(object):
     """
-    Plotting utilities class
+    Plotting utilities class.
     """
 
     time_tag = "Time [s]"
@@ -37,7 +37,7 @@ class PlottingUtilities(object):
 
         Parameters
         ----------
-        waveforms : np.ndarray, shape = (n_samples, n_detectors)
+        waveforms : np.ndarray, shape = (n_samples, n_channels)
             Waveform data to plot.
         timespan : float, optional
             Time span of the waveforms [s]. The default is 2.
@@ -53,7 +53,7 @@ class PlottingUtilities(object):
                                             cls.mag_tag + " " + cls.detector[1], 
                                             cls.mag_tag + " " + cls.detector[2]])
 
-        plt.style.use('seaborn')
+        plt.style.use("seaborn")
         fig, axes = plt.subplots(3, 1, figsize = (15, 10))
         for i in range(len(cls.detector)):
             sns.lineplot(data = dataframe, x = cls.time_tag, 
@@ -74,13 +74,13 @@ class PlottingUtilities(object):
 
         Parameters
         ----------
-        spectrogram : np.ndarray, shape (n_width, n_height, n_detectors)
+        spectrogram : np.ndarray, shape = (n_freq, n_time, n_channels)
             Spectrogram data.
         """
         if spectrogram.shape[-1] != 3:
             raise ValueError("Function expects exactly data for 3 detectors")
 
-        plt.style.use('seaborn')
+        plt.style.use("seaborn")
         fig, axes = plt.subplots(1, len(cls.detector), figsize = (15, 5))
         for i in range(len(cls.detector)):
             librosa.display.specshow(data = spectrogram[..., i], 
@@ -102,13 +102,9 @@ class PlottingUtilities(object):
         ----------
         dataframe : pd.DataFrame, columns = (id, target)
             Data with the id and targets of the set.
-
-        Returns
-        -------
-        None
         """
 
-        plt.style.use('seaborn')
+        plt.style.use("seaborn")
         fig, axes = plt.subplots(1, 1, figsize = (8, 4))
         sns.countplot(data = dataframe, x = "target")
         axes.set_xlabel("Targets")

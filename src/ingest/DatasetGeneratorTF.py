@@ -9,7 +9,6 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 from pathlib import Path, os
-from typing import Tuple
 from tensorflow.data.experimental import AUTOTUNE
 
 from .TFRDatasetCreator import TFRDatasetCreator
@@ -21,9 +20,8 @@ from config import Config
 
 class DatasetGeneratorTF(object):
     """
-    Class to aid in the creation of dataset pipelines using Tensorflow
+    Class to aid in the creation of dataset pipelines using tensorflow.
     """
-
 
     def __init__(
             self,
@@ -31,9 +29,7 @@ class DatasetGeneratorTF(object):
             datadir: Path,
             batch_size: int = 64,
             dtype: type = tf.float32,
-            wave_stats: Tuple[float, float] = None,
             raw_dir: bool = False,
-            trans: bool = False,
             ext: str = ".tfrec"
         ) -> None:
         """
@@ -45,8 +41,6 @@ class DatasetGeneratorTF(object):
             Dataframe with the indeces of the samples.
         datadir : Path
             Data directory.
-        shuffle_buffer : int, optional
-            Shuffle buffer. The default is 50000.
         batch_size : int, optional
             Batch size. The default is 32.
         dtype : type, optional
@@ -54,15 +48,8 @@ class DatasetGeneratorTF(object):
         raw_dir : bool
             Whether the folder should be treated as a raw data folder directory.
             The default is False.
-        target : bool, optional
-            Whether the target of the sample should be provided. The default is 
-            True.
         ext : str, optional
             Extension of the files. The default is ".tfrec".
-
-        Returns
-        -------
-        None
         """
 
         self.df = dataframe.copy()
@@ -83,6 +70,20 @@ class DatasetGeneratorTF(object):
             self, 
             filename: Path
         ) -> np.ndarray:
+        """
+        Auxiliary method to read data from npy file.
+
+        Parameters
+        ----------
+        filename : Path
+            Path and name of the example to read.
+
+        Returns
+        -------
+        np.ndarray
+            Data from the file.
+        """
+
         example_data = tf.cast(np.load(filename), self.dtype)
         return example_data
 
@@ -90,24 +91,30 @@ class DatasetGeneratorTF(object):
     def _get_dataset_from_npy(
             self,
             shuffle: bool = True,
-            buffer_size: int = 1000,
+            buffer_size: int = 1024,
             repeat: bool = True,
             target: bool = True
         ) -> tf.data.Dataset:
         """
-        Function to get the dataset pipeline from npy files
+        Function to get the dataset pipeline from npy files.
 
         Parameters
         ----------
-        shuffle_buffer : int, optional
-            Shuffle buffer size. If None, no shuffle will be applied. The default 
-            is 3200.
+        shuffle : bool, optional
+            Whether to add shuffle to the pipeline or not. The default is True.
+        buffer_size : int, optional
+            Shuffle buffer size. The default is 1024.
+        repeat : bool, optional
+            Whether to repeat the dataset or not. The default is True
+        target : bool, optional
+            Whether to add the label or not. The default is True.
 
         Returns
         -------
         tf.data.Dataset
             Dataset pipeline.
         """
+
         feature_ds = tf.data.Dataset.from_tensor_slices(self.df["path"])
         feature_ds = feature_ds.map(lambda x: tf.numpy_function(
             self._read_npy, [x], self.dtype), 
@@ -138,15 +145,21 @@ class DatasetGeneratorTF(object):
             target: bool = True
         ) -> tf.data.Dataset:
         """
-        Function to get the dataset pipeline from TFRecords.
+        Function to get the dataset pipeline from tensorflow records.
 
         Parameters
         ----------
-        shuffle_buffer : int, optional
-            Shuffle buffer size. If None, no shuffle will be applied. The default 
-            is 3200.
-
-
+        shuffle : bool, optional
+            Whether to add shuffle to the pipeline or not. The default is True.
+        buffer_size : int, optional
+            Shuffle buffer size. The default is 1024.
+        ordered: bool, optional
+            Indicate whether the order matters when reading. The default is False.
+        repeat : bool, optional
+            Whether to repeat the dataset or not. The default is True.
+        target : bool, optional
+            Whether to add the label or not. The default is True.
+        
         Returns
         -------
         tf.data.Dataset

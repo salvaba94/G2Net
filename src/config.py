@@ -21,7 +21,7 @@ class Config:
 ### Data preprocessing #######################################################
     GENERATE_TFR = False
     FILES_PER_TFR = 11200
-    TFR_DATA_PATH = Path(".", "..", "tfr_data_float32")
+    TFR_DATA_PATH = Path(".", "..", "tfr_data")
     TFR_TRAIN_PATH = TFR_DATA_PATH.joinpath("train")
     TFR_TEST_PATH = TFR_DATA_PATH.joinpath("test")
 
@@ -37,6 +37,8 @@ class Config:
     MODEL_PRELOAD = False
     MODEL_PRELOAD_NAME = "Model_publication_ref_small.h5"
     MODEL_PATH = Path(".", "..", "saved_models")
+    HISTORY_NAME = "history_train.csv"
+    
     AUTOML_PATH = str(Path(".", "automl").absolute())
     EFFNETV2_PATH = str(Path(AUTOML_PATH).joinpath("efficientnetv2").absolute())
     AUTOML_GIT_URL = "https://github.com/google/automl.git"

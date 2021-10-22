@@ -50,7 +50,7 @@ class G2NetEfficientNet(object):
             strategy: str = "GPU"
         ) -> None:
         """
-        Function to initialize the object.
+        Function to initialise the object.
         
         Parameters
         ----------

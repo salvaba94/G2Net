@@ -40,22 +40,17 @@ class TFRDatasetCreator(object):
             Dataframe with the indeces of the samples.
         datadir : Path
             Data directory.
-        target : bool, optional
-            Whether the target of the sample should be provided. The default is 
+        trans : bool, optional
+            Whether the to transpose the data before storing. The default is 
             False.
-        shuffle_buffer : int, optional
-            Shuffle buffer. The default is 50000.
-        dtype : type, optional
-            Data type to use. The default is np.float16.
+        data_stats : Tuple[float, float], optional
+            If provided, these are used to standardise the input data. It 
+            contains mean and standard deviation in this order. The default is None.
         raw_dir : bool
             Whether the folder should be treated as a raw data folder directory.
             The default is False.
         ext_in : str, optional
             Extension of the input files. The default is ".npy".
-
-        Returns
-        -------
-        None
         """
 
         self.df = dataframe.copy()
@@ -81,7 +76,7 @@ class TFRDatasetCreator(object):
 
         Parameters
         ----------
-        value : np.ndarray
+        value : Union[np.ndarray, tf.Tensor, str]
             Input value to convert to a list of bytes feature.
 
         Returns
@@ -99,15 +94,44 @@ class TFRDatasetCreator(object):
     def _int_feature(
             value: Union[int, bool]
         ) -> tf.train.Feature:
-        """Returns an int64_list from a bool / enum / int / uint."""
+        """
+        Function to convert a bool / enum / int / uint to an int feature.
+        
+        Parameters
+        ----------
+        value : Union[int, bool]
+            Input value to convert to an int feature.
+        
+        Returns
+        -------
+        tf.train.Feature
+            The converted feature.
+        """
+
         return tf.train.Feature(int64_list = tf.train.Int64List(value = [value]))
 
 
     def _serialize_example(
             self, 
-            idx,
+            idx: int,
             dtype: type = tf.float32
         ) -> str:
+        """
+        Method to serialise a single example.
+        
+        Parameters
+        ----------
+        idx : int
+            ID of the example to selialize.
+        dtype : type, optional
+            Data type to which the example should be serialised. The default 
+            is tf.float32.
+
+        Returns
+        -------
+        str
+            Serialised example.
+        """
 
         data = np.load(self.df["path"][idx])
         identity = self.df["id"][idx]
@@ -138,6 +162,26 @@ class TFRDatasetCreator(object):
             filename: str = "train",
             ext_out: str = ".tfrec"
         ) -> None:
+        """
+        Method to serialise a batch of examples and write it to tensorflow record.
+        
+        Parameters
+        ----------
+        data : Tuple[int, np.ndarray]
+            Batch data. Contains batch ID and array of examples to be serialised,
+            respectively.
+        destdir : Path
+            Destination directory.
+        dtype : type, optional
+            Data type to which the examples should be serialised. The default 
+            is tf.float32.
+        filename : str, optional
+            Filename of the output tensorflow record. To it, the batch ID and 
+            the range of the examples contained in it will be appended. 
+            The default is "train".
+        ext_out : str, optional
+            Extension of the output files. The default is ".tfrec".
+        """
 
         n_batch, batch = data
         filename_batch = destdir.joinpath(filename + str(n_batch).zfill(3) 
@@ -145,6 +189,7 @@ class TFRDatasetCreator(object):
         with tf.io.TFRecordWriter(str(filename_batch)) as writer:
             for idx in batch:
                 writer.write(self._serialize_example(idx, dtype = dtype))
+
 
 
     def serialize_dataset(
@@ -155,6 +200,25 @@ class TFRDatasetCreator(object):
             filename: str = "train",
             ext_out: str = ".tfrec"
         ) -> None:
+        """
+        Method to serialise a the full dataset and write it to a set of 
+        tensorflow records.
+        
+        Parameters
+        ----------
+        n_samples : int
+            Number of samples used to calculate the number of tensorflow 
+            records files.
+        destdir : Path
+            Destination directory.
+        dtype : type, optional
+            Data type to which the examples should be serialised. The default 
+            is tf.float32.
+        filename : str, optional
+            Filename of the output tensorflow record. The default is "train".
+        ext_out : str, optional
+            Extension of the output files. The default is ".tfrec".
+        """
 
         destdir.mkdir(parents = True, exist_ok = True)
 
@@ -174,7 +238,29 @@ class TFRDatasetCreator(object):
             dtype: type = tf.float32,
             target: bool = False,
             shape: Tuple[int, int] = (4096, 3)
-        ) -> Tuple[tf.Tensor, int, int]:
+        ) -> Tuple[tf.Tensor, int]:
+        """
+        Method intended to be used in any dataset generator to deserialise the 
+        examples from tensorflow records.
+        
+        Parameters
+        ----------
+        element : int
+            Serialised example.
+        dtype : type, optional
+            Data type to which the example was serialised. The default is tf.float32.
+        target : bool, optional
+            Whether the label should be included in the output. If false, it is 
+            interpreted that the aim is to predict and, therefore, the ID of the 
+            example is appended instead. The default is False.
+        shape : Tuple[int, int], optional
+            Shape to which the example data should be reshaped 
+        
+        Returns
+        -------
+        Tuple[tf.Tensor, int]
+            Example data and label or ID, depending on the value of target argument.
+        """
 
         feature = {
             "data"  : tf.io.FixedLenFeature([], tf.string),

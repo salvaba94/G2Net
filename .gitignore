@@ -4,8 +4,6 @@ data/*
 !data/.gitkeep
 tfr_data/*
 !tfr_data/.gitkeep
-cqt_data/*
-!cqt_data/.gitkeep
 saved_models/*
 !saved_models/.gitkeep
 
@@ -15,6 +13,3 @@ src/ingest/__pycache__
 src/models/__pycache__
 src/train/__pycache__
 src/utilities/__pycache__
-
-src/automl/__pycache__
-src/automl/efficientnetv2/__pycache__

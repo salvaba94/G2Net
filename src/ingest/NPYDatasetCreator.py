@@ -7,11 +7,10 @@ Created on Thu Aug 26 10:51:16 2021
 
 import pandas as pd
 import numpy as np
-import tensorflow as tf
 import os
 import multiprocessing as mp
 from pathlib import Path
-from typing import Union, Tuple
+from typing import Tuple
 from functools import partial
 
 
@@ -27,7 +26,6 @@ class NPYDatasetCreator(object):
             dataframe: pd.DataFrame,
             datadir: Path,
             trans: bool = False,
-            target: bool = False,
             data_stats: Tuple[float, float] = None,
             raw_dir: bool = False,
             ext_in: str = ".npy",
@@ -35,34 +33,28 @@ class NPYDatasetCreator(object):
         ) -> None:
         """
         Function to initialise the object.
-
+        
         Parameters
         ----------
         dataframe : pd.DataFrame, columns = (id, targets)
             Dataframe with the indeces of the samples.
         datadir : Path
             Data directory.
-        target : bool, optional
-            Whether the target of the sample should be provided. The default is 
+        trans : bool, optional
+            Whether the to transpose the data before storing. The default is 
             False.
-        shuffle_buffer : int, optional
-            Shuffle buffer. The default is 50000.
-        dtype : type, optional
-            Data type to use. The default is np.float16.
+        data_stats : Tuple[float, float], optional
+            If provided, these are used to standardise the input data. It 
+            contains mean and standard deviation in this order. The default is None.
         raw_dir : bool
             Whether the folder should be treated as a raw data folder directory.
             The default is False.
         ext_in : str, optional
             Extension of the input files. The default is ".npy".
-
-        Returns
-        -------
-        None
         """
 
         self.df = dataframe.copy()
         self.datadir = datadir
-        self.target = target
         self.data_stats = data_stats
         self.trans = trans
 
@@ -80,6 +72,17 @@ class NPYDatasetCreator(object):
             idx,
             dtype: type = np.float16
         ) -> np.ndarray:
+        """
+        Method to preprocess a single example.
+        
+        Parameters
+        ----------
+        idx : int
+            ID of the example to preprocess.
+        dtype : type, optional
+            Data type to which the example should be casted to. The default 
+            is np.float16.
+        """
 
         data = np.load(self.df["path"][idx])
         data = data.T if self.trans else data
@@ -96,7 +99,21 @@ class NPYDatasetCreator(object):
             dtype: type = np.float16,
             ext_out: str = ".npy"
         ) -> None:
-
+        """
+        Method to preprocess a single example and save it.
+        
+        Parameters
+        ----------
+        idx : int
+            ID of the example to preprocess and save.
+        destdir : Path
+            Destination directory.
+        dtype : type, optional
+            Data type to which the example should be saved. The default 
+            is np.float16.
+        ext_out : str, optional
+            Extension of the output files. The default is ".npy".
+        """
         filename = destdir.joinpath(self.df["id"][idx] + ext_out)
         data = self._preprocess_example(idx, dtype = dtype)
         np.save(filename, data)
@@ -109,6 +126,22 @@ class NPYDatasetCreator(object):
             ext_out: str = ".npy",
             n_processes: int = 1
         ) -> None:
+        """
+        Method to create a full preprocessed dataset and write it to npy files.
+        
+        Parameters
+        ----------
+        destdir : Path
+            Destination directory.
+        dtype : type, optional
+            Data type to which the examples should be saved. The default 
+            is np.float16.
+        ext_out : str, optional
+            Extension of the output files. The default is ".npy".
+        n_processes: int, optional
+            Number of processes reading, preprocessing and saving files. The 
+            default is 1.
+        """
 
         n_cpus = np.maximum(n_processes, 0)
         n_cpus = np.minimum(n_cpus, mp.cpu_count())

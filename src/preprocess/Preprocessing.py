@@ -21,7 +21,7 @@ from utilities import GeneralUtilities
 class TukeyWinLayer(tf.keras.layers.Layer):
     """
     Layer that applies a Tukey window function to an input time series, where 
-    the possibility of training the shape parameter is given.
+    the possibility of training the shape parameter is given. Not usable with TPU.
     """
 
     def __init__(
@@ -30,6 +30,7 @@ class TukeyWinLayer(tf.keras.layers.Layer):
             **kwargs
         ) -> None:
         """
+        Function to initialise the object.
 
         Parameters
         ----------
@@ -221,6 +222,7 @@ class WindowingLayer(tf.keras.layers.Layer):
             **kwargs
         ) -> None:
         """
+        Function to initialise the object.
 
         Parameters
         ----------
@@ -230,10 +232,6 @@ class WindowingLayer(tf.keras.layers.Layer):
         window_len : int, optional
             The number of samples in the window (set it to the signal length). 
             The default is 4096.
-
-        Returns
-        -------
-        None
         """
     
         super(WindowingLayer, self).__init__(**kwargs)
@@ -250,6 +248,16 @@ class WindowingLayer(tf.keras.layers.Layer):
             self, 
             input_shape: Tuple[int, int]
         ) -> None:
+        """
+        Function to build the graph of the layer. Adds trainable and non-
+        trainable parameters.
+        
+        Parameters
+        ----------
+        input_shape : Tuple[int, int]
+            Shape of the input to the layer.
+        """
+
         if self.trainable:
             self.trainable_weights.append(self.window)
         else:
@@ -316,7 +324,7 @@ class WhitenLayer(tf.keras.layers.Layer):
             **kwargs
         ) -> None:
         """
-        Function to initialize the object.
+        Function to initialise the object.
         
         Parameters
         ----------

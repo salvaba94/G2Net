@@ -13,7 +13,8 @@ class CosineAnnealingRestarts(tf.keras.experimental.CosineDecayRestarts):
     """
     This class inherits from CosineDecayRestarts. It adds the functionality 
     of returning the initial learning rate when a float conversion is called 
-    and the assignment functionality.
+    and the assignment functionality. In such a way, this learning rate schedule
+    can be used with ReduceLROnPlateau.
     """
 
     def __init__(

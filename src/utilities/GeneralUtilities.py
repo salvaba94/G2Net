@@ -18,7 +18,7 @@ import tensorflow as tf
 
 class GeneralUtilities(object):
     """
-    General utilities class
+    General utilities class.
     """
     
     safe_term = 1e-20
@@ -45,7 +45,6 @@ class GeneralUtilities(object):
         -------
         Tuple[int, int]
             Tuple containing the shape of the data points.
-
         """
         example_files_gen = datadir.glob("**/*" + ext)
         for example_file in example_files_gen:
@@ -166,7 +165,7 @@ class GeneralUtilities(object):
         Returns
         -------
         float
-            Mean of the sample
+            Mean of the sample.
         """
         
         waveform = cls.get_sample(sample_df, datadir, idx, trans = False, 

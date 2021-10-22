@@ -19,7 +19,7 @@ from utilities import GeneralUtilities
 
 class CQTLayer(tf.keras.layers.Layer):
     """
-    Constant Q Transform keras layer. Based on the nnaudio implementation 
+    Constant-Q Transform keras layer. Based on the nnaudio implementation 
     and extended to bound the output spectrogram to the input of an image-based
     model.
     
@@ -51,7 +51,7 @@ class CQTLayer(tf.keras.layers.Layer):
             **kwargs
         ) -> None:
         """
-        Function to initialize the object.
+        Function to initialise the object.
 
         Parameters
         ----------
@@ -187,7 +187,7 @@ class CQTLayer(tf.keras.layers.Layer):
 
     def build(
             self, 
-            input_shape: Tuple[int, int, int]
+            input_shape: Tuple[int, int]
         ) -> None:
         """
         Function to build the graph of the layer. Adds trainable and non-
@@ -230,7 +230,7 @@ class CQTLayer(tf.keras.layers.Layer):
 
         Returns
         -------
-        tf.Tensor, shape = (None, n_time, n_freq, n_detectors)
+        tf.Tensor, shape = (None, n_freq, n_time, n_detectors)
             The corresponding batch of constant Q transforms.
         """
 

@@ -26,7 +26,7 @@ class PermuteChannel(tf.keras.layers.Layer):
             **kwargs
         ) -> None:
         """
-        Function to initialize the object.
+        Function to initialise the object.
 
         Parameters
         ----------
@@ -146,7 +146,7 @@ class GaussianNoise(tf.keras.layers.Layer):
             **kwargs
         ) -> None:
         """
-        Function to initialize the object.
+        Function to initialise the object.
 
         Parameters
         ----------
@@ -255,7 +255,7 @@ class GaussianNoise(tf.keras.layers.Layer):
 
 class SpectralMask(tf.keras.layers.Layer):
     """
-    Layer that applies spectral masks to an input spectrogram.
+    Layer that applies spectral masks to an input spectrogram. Not usable with TPU.
     """
 
     def __init__(
@@ -268,7 +268,7 @@ class SpectralMask(tf.keras.layers.Layer):
             **kwargs
         ) -> None:
         """
-        Function to initialize the object.
+        Function to initialise the object.
 
         Parameters
         ----------
@@ -474,7 +474,7 @@ class TimeMask(tf.keras.layers.Layer):
             **kwargs
         ) -> None:
         """
-        Function to initialize the object.
+        Function to initialise the object.
 
         Parameters
         ----------
@@ -578,7 +578,7 @@ class FreqMask(tf.keras.layers.Layer):
             **kwargs
         ) -> None:
         """
-        Function to initialize the object.
+        Function to initialise the object.
 
         Parameters
         ----------
@@ -671,7 +671,7 @@ class FreqMask(tf.keras.layers.Layer):
 
 class _Utilities(object):
     """ 
-    Utilities class for augmentations 
+    Utilities class for augmentations/regularisations
     """
 
     @staticmethod
@@ -685,7 +685,7 @@ class _Utilities(object):
         
         Parameters
         ----------
-        data : tf.Tensor, shape = (None, n_time, n_freq, n_detectors)
+        data : tf.Tensor, shape = (None, n_freq, n_time, n_detectors)
             Input spectrogram.
         param: int
             Parameter of time masking indicative of width.

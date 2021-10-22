@@ -11,7 +11,7 @@ from tensorflow.python.client import device_lib
 
 class Acceleration(object):
     """
-    General hardware acceleration class
+    General hardware acceleration class.
     """
 
     @staticmethod
