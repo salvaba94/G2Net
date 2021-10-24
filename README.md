@@ -4,12 +4,12 @@
 
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
+[![Stars][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
+[![GPL License][license-shield]][license-url]
 
 <!-- TOC -->
-<details>
+<details open=true>
   <summary>Table of Contents</summary>
   <ol>
     <li>
