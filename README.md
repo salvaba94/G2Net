@@ -37,6 +37,7 @@
         <li><a href="#in-colab">In Colab</a></li>
       </ul>
     </li>
+    <li><a href="#contributing">Contributing</a></li>
     <li><a href="#acknowledgements">Acknowledgments</a></li>
   </ol>
 </details>
