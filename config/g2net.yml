@@ -285,4 +285,3 @@ dependencies:
     - tensorflow-io==0.19.1
     - tensorflow-io-gcs-filesystem==0.19.1
     - typeguard==2.12.1
-prefix: C:\Users\salva\Anaconda3\envs\g2net
