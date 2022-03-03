@@ -128,11 +128,11 @@ Among others, the project has been built around the following major Python libra
 #### Installation
 In order to make use of the project locally (tested in Windows), one should just follow two steps:
 1. Clone the project:
-```
+```bash
   git clone https://github.com/salvaba94/G2Net.git
 ```
 2. Assuming that Anaconda Prompt is installed, run the following command to install the dependencies:
-```
+```bash
   conda env create --file g2net.yml
 ```
 
@@ -152,14 +152,14 @@ To experiment locally:
 
 If by any chance you experience a ```NotImplementedError``` (see below), it is an incompatibility issue between the installed TensorFlow and NumPy library versions. It is related to a change in exception types that makes it to be uncaught.
 
-```
+```python
   NotImplementedError: Cannot convert a symbolic Tensor (gradient_tape/model/bandpass/irfft_2/add:0) to a numpy array. 
   This error may indicate that you're trying to pass a Tensor to a NumPy call, which is not supported.
 ``` 
 
 The origin is in line 867 in ```tensorflow/python/framework/ops.py```. It is solved by replacing
 
-```
+```python
   def __array__(self):
     raise NotImplementedError(
         "Cannot convert a symbolic Tensor ({}) to a numpy array."
@@ -167,7 +167,7 @@ The origin is in line 867 in ```tensorflow/python/framework/ops.py```. It is sol
         " a NumPy call, which is not supported".format(self.name))
 ```
 by
-```
+```python
   def __array__(self):
     raise TypeError(
         "Cannot convert a symbolic Tensor ({}) to a numpy array."
@@ -195,15 +195,15 @@ Any contributions are greatly appreciated. If you have suggestions that would ma
 
 1. Fork the project.
 2. Create your branch:
-```
+```bash
   git checkout -b branchname
 ```
 3. Commit your changes:
-```
+```bash
   git commit -m "Add some amazing feature"
 ```
 4. Push to the branch: 
-```
+```bash
   git push origin branchname
 ```
 5. Open a pull request.
