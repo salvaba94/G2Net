@@ -235,7 +235,7 @@ Any contributions are greatly appreciated. If you have suggestions that would ma
 [issues-shield]: https://img.shields.io/github/issues/salvaba94/G2Net.svg?style=plastic&color=0e76a8
 [issues-url]: https://github.com/salvaba94/G2Net/issues
 [license-shield]: https://img.shields.io/github/license/salvaba94/G2Net.svg?style=plastic&color=0e76a8
-[license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
+[license-url]: https://github.com/salvaba94/G2Net/blob/main/LICENSE.md
 [kaggle-competition]: https://www.kaggle.com/c/g2net-gravitational-wave-detection
 [colliding-blackholes]: https://www.youtube.com/watch?v=QyDcTbR-kEA
 [model-image]: https://github.com/salvaba94/G2Net/blob/main/img/Model.png?raw=true
